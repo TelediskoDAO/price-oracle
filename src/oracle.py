@@ -20,7 +20,7 @@ def run():
     w3 = Web3(Web3.HTTPProvider(PROVIDER_URL))
 
     if not w3.isConnected():
-      exit("Not connected")
+      raise Exception("Not connected")
 
     SYMBOLS = ["EEUR", "EUR"]
     prices = []
