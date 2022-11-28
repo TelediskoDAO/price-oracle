@@ -16,45 +16,43 @@ FREQUENCY = int(os.environ.get("FREQUENCY", "1"))
 
 
 def run():
-  w3 = Web3(Web3.HTTPProvider(PROVIDER_URL))
+  try:
+    w3 = Web3(Web3.HTTPProvider(PROVIDER_URL))
 
-  if not w3.isConnected():
-    exit("Not connected")
+    if not w3.isConnected():
+      exit("Not connected")
 
-  SYMBOLS = ["EEUR", "EUR"]
-  prices = []
-  for symbol in SYMBOLS:
-    prices.append(int(get(symbol) * 1e9))
-  times = [int(time.time())] * 2
+    SYMBOLS = ["EEUR", "EUR"]
+    prices = []
+    for symbol in SYMBOLS:
+      prices.append(int(get(symbol) * 1e9))
+    times = [int(time.time())] * 2
 
-  oracle_contract = w3.eth.contract(address=ORACLE, abi=ABI)
-  account = Account.from_key(PRIVATE_KEY)
-  nonce = w3.eth.getTransactionCount(account.address)
+    oracle_contract = w3.eth.contract(address=ORACLE, abi=ABI)
+    account = Account.from_key(PRIVATE_KEY)
+    nonce = w3.eth.getTransactionCount(account.address)
 
-  max_fee = 25
-  max_priority_fee = 2
+    max_fee = 25
+    max_priority_fee = 2
 
-  print(f"""\
-    submitting\n\
-      symbols: {SYMBOLS}\n\
-      prices: {prices}\n\
-      times: {times}\n\
-  """)
+    relay_txn = oracle_contract.functions.relay(SYMBOLS, prices, times).buildTransaction({
+        'chainId': CHAIN_ID,
+        'maxFeePerGas': Web3.toWei(max_fee, 'gwei'),
+        'maxPriorityFeePerGas': Web3.toWei(max_priority_fee, 'gwei'),
+        'from': account.address,
+        'nonce': nonce
+    })
 
-  relay_txn = oracle_contract.functions.relay(SYMBOLS, prices, times).buildTransaction({
-      'chainId': CHAIN_ID,
-      'maxFeePerGas': Web3.toWei(max_fee, 'gwei'),
-      'maxPriorityFeePerGas': Web3.toWei(max_priority_fee, 'gwei'),
-      'from': account.address,
-      'nonce': nonce
-  })
+    signed_txn = w3.eth.account.signTransaction(relay_txn, private_key=PRIVATE_KEY)
+    tx_hash = w3.toHex(w3.keccak(signed_txn.rawTransaction))
+    w3.eth.sendRawTransaction(signed_txn.rawTransaction)
 
-  signed_txn = w3.eth.account.signTransaction(relay_txn, private_key=PRIVATE_KEY)
-  tx_hash = w3.toHex(w3.keccak(signed_txn.rawTransaction))
-  w3.eth.sendRawTransaction(signed_txn.rawTransaction)
-  print(tx_hash)
-
-
+    with open("info.log", "w") as file:
+      file.write(f"relayed {SYMBOLS} {prices} {times} {tx_hash}")
+  except Exception as e:
+    with open("error.log", "w") as file:
+      file.write(str(e))
+      
 
 schedule.every(FREQUENCY).minutes.do(run)
 
