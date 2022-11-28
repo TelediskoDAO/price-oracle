@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from web3 import Web3
+from web3.auto import w3
 from eth_utils.address import to_checksum_address
 from eth_account import Account
 from contract import ABI
@@ -10,15 +11,12 @@ import schedule
 
 ORACLE = to_checksum_address(os.environ["ORACLE"])
 PRIVATE_KEY = os.environ["PRIVATE_KEY"]
-PROVIDER_URL = os.environ.get("PROVIDER_URL", "http://127.0.0.1:8545")
 CHAIN_ID = int(os.environ.get("CHAIN_ID", "666666"))
 FREQUENCY = int(os.environ.get("FREQUENCY", "1"))
 
 
 def run():
   try:
-    w3 = Web3(Web3.HTTPProvider(PROVIDER_URL))
-
     if not w3.isConnected():
       raise Exception("Not connected")
 
@@ -47,14 +45,15 @@ def run():
     tx_hash = w3.toHex(w3.keccak(signed_txn.rawTransaction))
     w3.eth.sendRawTransaction(signed_txn.rawTransaction)
 
-    with open("info.log", "w") as file:
-      file.write(f"relayed {SYMBOLS} {prices} {times} {tx_hash}")
+    with open("info.log", "a") as file:
+      file.write(f"relayed {SYMBOLS} {prices} {times} {tx_hash}\n")
   except Exception as e:
-    with open("error.log", "w") as file:
-      file.write(str(e))
+    with open("error.log", "a") as file:
+      file.write(str(e) + "\n")
       
 
 schedule.every(FREQUENCY).minutes.do(run)
+run()
 
 while True:
     schedule.run_pending()
