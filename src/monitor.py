@@ -12,7 +12,7 @@ def check():
     with open(INFO_LOG, "r") as logs:
         lines = list(filter(lambda x: x, logs.read().split("\n")))
         last_update = int(lines[-1].split("\t")[0])
-        if time() > last_update + 60 * 12:
+        if time() > last_update + 60 * 60 * 2:
             return "error", 500
         else:
             return "ok"
