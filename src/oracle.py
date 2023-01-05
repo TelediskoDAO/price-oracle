@@ -46,7 +46,7 @@ def run():
     w3.eth.sendRawTransaction(signed_txn.rawTransaction)
 
     with open("info.log", "a") as file:
-      file.write(f"relayed {SYMBOLS} {prices} {times} {tx_hash}\n")
+      file.write(f"{int(time.time())}\t{SYMBOLS}\t{prices}\t{times}\t{tx_hash}\n")
   except Exception as e:
     with open("error.log", "a") as file:
       file.write(str(e) + "\n")
