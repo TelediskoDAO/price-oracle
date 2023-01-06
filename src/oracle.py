@@ -13,7 +13,8 @@ ORACLE = to_checksum_address(os.environ["ORACLE"])
 PRIVATE_KEY = os.environ["PRIVATE_KEY"]
 CHAIN_ID = int(os.environ.get("CHAIN_ID", "666666"))
 FREQUENCY = int(os.environ.get("FREQUENCY", "1"))
-
+INFO_LOG = os.environ.get("INFO_LOG", "info.log")
+ERROR_LOG = os.environ.get("ERROR_LOG", "error.log")
 
 def run():
   try:
@@ -45,10 +46,10 @@ def run():
     tx_hash = w3.toHex(w3.keccak(signed_txn.rawTransaction))
     w3.eth.sendRawTransaction(signed_txn.rawTransaction)
 
-    with open("info.log", "a") as file:
-      file.write(f"relayed {SYMBOLS} {prices} {times} {tx_hash}\n")
+    with open(INFO_LOG, "a") as file:
+      file.write(f"{int(time.time())}\t{SYMBOLS}\t{prices}\t{times}\t{tx_hash}\n")
   except Exception as e:
-    with open("error.log", "a") as file:
+    with open(ERROR_LOG, "a") as file:
       file.write(str(e) + "\n")
       
 
