@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-from contract import ABI_CHAINLINK
-import sys
 from eth_utils.address import to_checksum_address
-import os
+from contracts import ABI_CHAINLINK
 from web3 import Web3
+import sys
+import os
 
 CONTRACTS = {
     "USDC": to_checksum_address(os.environ["EUR_USD_CONTRACT"]),
