@@ -24,7 +24,7 @@ def run():
     SYMBOLS = ["USDC", "EUR"]
     prices = []
     for symbol in SYMBOLS:
-      prices.append(int(get(symbol)))
+      prices.append(int(get(symbol) * 1e18))
     times = [int(time.time())] * 2
 
     oracle_contract = w3.eth.contract(address=ORACLE, abi=ABI_ORACLE)

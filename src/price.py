@@ -7,16 +7,17 @@ import sys
 import os
 
 CONTRACTS = {
-    "USDC": to_checksum_address(os.environ["EUR_USD_CONTRACT"]),
-    "EUR": to_checksum_address(os.environ["USDC_USD_CONTRACT"])
+    "EUR": to_checksum_address(os.environ["EUR_USD_CONTRACT"]),
+    "USDC": to_checksum_address(os.environ["USDC_USD_CONTRACT"])
 }
 WEB3_PROVIDER = os.environ["MAINNET_PROVIDER_URI"]
 
 def get(symbol):
     w3 = Web3(Web3.HTTPProvider(WEB3_PROVIDER))
     contract = w3.eth.contract(address=CONTRACTS[symbol], abi=ABI_CHAINLINK)
+    decimals = contract.functions.decimals().call()
     response = contract.functions.latestRoundData().call()
-    return float(response[1])
+    return float(response[1]) / (10 ** decimals)
     
 if __name__ == "__main__":
     try:
