@@ -7,8 +7,8 @@ import os
 from web3 import Web3
 
 CONTRACTS = {
-    "usdc": to_checksum_address(os.environ["EUR_USD_CONTRACT"]),
-    "eur": to_checksum_address(os.environ["USDC_USD_CONTRACT"])
+    "USDC": to_checksum_address(os.environ["EUR_USD_CONTRACT"]),
+    "EUR": to_checksum_address(os.environ["USDC_USD_CONTRACT"])
 }
 WEB3_PROVIDER = os.environ["MAINNET_PROVIDER_URI"]
 
