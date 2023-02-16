@@ -1,14 +1,23 @@
 #!/usr/bin/env python3
 
-import requests
+from eth_utils.address import to_checksum_address
+from contracts import ABI_CHAINLINK
+from web3 import Web3
 import sys
+import os
 
-
-URL = "https://api.e-money.com/v1/rate/{}/usd"
+CONTRACTS = {
+    "EUR": to_checksum_address(os.environ["EUR_USD_CONTRACT"]),
+    "USDC": to_checksum_address(os.environ["USDC_USD_CONTRACT"])
+}
+WEB3_PROVIDER = os.environ["MAINNET_PROVIDER_URI"]
 
 def get(symbol):
-    usd_price = requests.get(URL.format(symbol)).content
-    return float(usd_price)
+    w3 = Web3(Web3.HTTPProvider(WEB3_PROVIDER))
+    contract = w3.eth.contract(address=CONTRACTS[symbol], abi=ABI_CHAINLINK)
+    decimals = contract.functions.decimals().call()
+    response = contract.functions.latestRoundData().call()
+    return float(response[1]) / (10 ** decimals)
     
 if __name__ == "__main__":
     try:

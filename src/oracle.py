@@ -3,7 +3,7 @@ from web3 import Web3
 from web3.auto import w3
 from eth_utils.address import to_checksum_address
 from eth_account import Account
-from contract import ABI
+from contracts import ABI_ORACLE
 from price import get
 import time
 import os
@@ -21,13 +21,13 @@ def run():
     if not w3.isConnected():
       raise Exception("Not connected")
 
-    SYMBOLS = ["EEUR", "EUR"]
+    SYMBOLS = ["USDC", "EUR"]
     prices = []
     for symbol in SYMBOLS:
-      prices.append(int(get(symbol) * 1e9))
+      prices.append(int(get(symbol) * 1e18))
     times = [int(time.time())] * 2
 
-    oracle_contract = w3.eth.contract(address=ORACLE, abi=ABI)
+    oracle_contract = w3.eth.contract(address=ORACLE, abi=ABI_ORACLE)
     account = Account.from_key(PRIVATE_KEY)
     nonce = w3.eth.getTransactionCount(account.address)
 
